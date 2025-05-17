@@ -108,12 +108,18 @@ class Job(models.Model):
 class Application(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
-    # company = models.ForeignKey(Company, on_delete=models.CASCADE)
     resume = models.ForeignKey(Resume, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
     cover_letter = models.TextField(default="")
     status = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        # If company is not set but job is, get company from job
+        if not self.company_id and self.job_id:
+            self.company = self.job.company
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return (

@@ -3,7 +3,6 @@ from django_filters import rest_framework as filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 from .models import (
@@ -110,6 +109,14 @@ class ApplicationViewSet(viewsets.ModelViewSet):
     serializer_class = ApplicationSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = ApplicationFilter
+
+    def perform_create(self, serializer):
+        """Override create to set company if not provided"""
+        if not serializer.validated_data.get('company') and serializer.validated_data.get('job'):
+            job = serializer.validated_data['job']
+            serializer.save(company=job.company)
+        else:
+            serializer.save()
 
 
 class AuctionFilter(filters.FilterSet):

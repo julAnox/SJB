@@ -158,7 +158,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
             "user",
             "job",
             "resume",
-            # "company",
+            "company",
             "cover_letter",
             "status",
             "created_at",

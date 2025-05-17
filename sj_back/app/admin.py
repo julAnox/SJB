@@ -136,11 +136,11 @@ class AdminApplication(admin.ModelAdmin):
         "user",
         "job",
         "resume",
-        # "company",
+        "company",
         "cover_letter",
         "status",
     ]
-    list_display = ["id", "user", "job", "status", "created_at"]
+    list_display = ["id", "user", "job", "status", "created_at", "company"]
     search_fields = ["user__email", "job__title"]
     list_filter = ["status"]
 
