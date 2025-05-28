@@ -12,7 +12,8 @@ from .models import (
     Issue,
     Company,
     Job,
-    Application,
+    JobApplication,
+    ResumeApplication,
     Auction,
     AuctionBid,
     Chat,
@@ -27,7 +28,8 @@ from .serializers import (
     IssueSerializer,
     CompanySerializer,
     JobSerializer,
-    ApplicationSerializer,
+    JobApplicationSerializer,
+    ResumeApplicationSerializer,
     AuctionSerializer,
     AuctionBidSerializer,
     ChatSerializer,
@@ -100,13 +102,13 @@ class JobViewSet(viewsets.ModelViewSet):
 
 class ApplicationFilter(filters.FilterSet):
     class Meta:
-        model = Application
+        model = JobApplication
         fields = ["user", "job", "status"]
 
 
-class ApplicationViewSet(viewsets.ModelViewSet):
-    queryset = Application.objects.all()
-    serializer_class = ApplicationSerializer
+class JobApplicationViewSet(viewsets.ModelViewSet):
+    queryset = JobApplication.objects.all()
+    serializer_class = JobApplicationSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = ApplicationFilter
 
@@ -117,6 +119,13 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             serializer.save(company=job.company)
         else:
             serializer.save()
+
+
+class ResumeApplicationViewSet(viewsets.ModelViewSet):
+    queryset = ResumeApplication.objects.all().select_related('resume__user', 'company')
+    serializer_class = ResumeApplicationSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = ApplicationFilter
 
 
 class AuctionFilter(filters.FilterSet):
@@ -201,7 +210,7 @@ class ChatViewSet(viewsets.ModelViewSet):
             # If user is a student, get chats for their applications
             user = get_object_or_404(User, id=user_id)
             if user.role == 'student':
-                applications = Application.objects.filter(user=user_id)
+                applications = JobApplication.objects.filter(user=user_id)
                 user_chats = Chat.objects.filter(application__in=applications)
 
             # If user is a company, get chats for jobs they posted
@@ -212,7 +221,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                     # Get jobs for this company
                     jobs = Job.objects.filter(company=company.id)
                     # Get applications for these jobs
-                    applications = Application.objects.filter(job__in=jobs)
+                    applications = JobApplication.objects.filter(job__in=jobs)
                     # Get chats for these applications
                     user_chats = Chat.objects.filter(application__in=applications)
                 except Company.DoesNotExist:

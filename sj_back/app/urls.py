@@ -8,7 +8,8 @@ from .views import (
     IssueViewSet,
     CompanyViewSet,
     JobViewSet,
-    ApplicationViewSet,
+    JobApplicationViewSet,
+    ResumeApplicationViewSet,
     AuctionViewSet,
     AuctionBidViewSet,
     ChatViewSet,
@@ -24,7 +25,8 @@ router.register(r'comments', CommentViewSet)
 router.register(r'issues', IssueViewSet)
 router.register(r'companies', CompanyViewSet)
 router.register(r'jobs', JobViewSet)
-router.register(r'applications', ApplicationViewSet)
+router.register(r'job_applications', JobApplicationViewSet)
+router.register(r'resume_applications', ResumeApplicationViewSet)
 router.register(r'auctions', AuctionViewSet)
 router.register(r'auction-bids', AuctionBidViewSet)
 router.register(r'chats', ChatViewSet)

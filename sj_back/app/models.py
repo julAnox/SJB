@@ -105,7 +105,7 @@ class Job(models.Model):
         return str(self.id) + ". " + self.company.name + ", " + self.title
 
 
-class Application(models.Model):
+class JobApplication(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     resume = models.ForeignKey(Resume, on_delete=models.CASCADE)
@@ -133,8 +133,27 @@ class Application(models.Model):
         )
 
 
+class ResumeApplication(models.Model):
+    resume = models.ForeignKey(Resume, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
+    message = models.TextField(default="")
+    status = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        if hasattr(self.resume, 'user') and self.resume.user:
+            user_info = f"{self.resume.user.first_name} {self.resume.user.last_name}"
+        else:
+            user_info = "Unknown User"
+
+        company_info = f" at {self.company.name}" if self.company else ""
+
+        return f"Application #{self.id} by {user_info}{company_info} ({self.status})"
+
+
 class Auction(models.Model):
-    application = models.ForeignKey(Application, on_delete=models.CASCADE)
+    application = models.ForeignKey(JobApplication, on_delete=models.CASCADE)
     status = models.CharField(max_length=255)
     start_time = models.CharField(max_length=255)
     current_stage = models.IntegerField()
@@ -166,7 +185,7 @@ class AuctionBid(models.Model):
 
 
 class Chat(models.Model):
-    application = models.ForeignKey(Application, on_delete=models.CASCADE)
+    application = models.ForeignKey(JobApplication, on_delete=models.CASCADE)
     status = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)

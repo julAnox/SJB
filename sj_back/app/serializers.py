@@ -6,7 +6,8 @@ from .models import (
     Issue,
     Company,
     Job,
-    Application,
+    JobApplication,
+    ResumeApplication,
     Auction,
     AuctionBid,
     Chat,
@@ -150,9 +151,9 @@ class JobSerializer(serializers.ModelSerializer):
         ]
 
 
-class ApplicationSerializer(serializers.ModelSerializer):
+class JobApplicationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Application
+        model = JobApplication
         fields = [
             "id",
             "user",
@@ -160,6 +161,20 @@ class ApplicationSerializer(serializers.ModelSerializer):
             "resume",
             "company",
             "cover_letter",
+            "status",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class ResumeApplicationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResumeApplication
+        fields = [
+            "id",
+            "resume",
+            "company",
+            "message",
             "status",
             "created_at",
             "updated_at",

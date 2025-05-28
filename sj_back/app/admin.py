@@ -10,7 +10,8 @@ from .models import (
     Issue,
     Company,
     Job,
-    Application,
+    JobApplication,
+    ResumeApplication,
     Auction,
     AuctionBid,
     Chat,
@@ -130,8 +131,8 @@ class AdminJob(admin.ModelAdmin):
         return f"{obj.salary_min} - {obj.salary_max} {obj.type_of_money}"
 
 
-@admin.register(Application)
-class AdminApplication(admin.ModelAdmin):
+@admin.register(JobApplication)
+class AdminJobApplication(admin.ModelAdmin):
     fields = [
         "user",
         "job",
@@ -143,6 +144,34 @@ class AdminApplication(admin.ModelAdmin):
     list_display = ["id", "user", "job", "status", "created_at", "company"]
     search_fields = ["user__email", "job__title"]
     list_filter = ["status"]
+
+
+@admin.register(ResumeApplication)
+class AdminResumeApplication(admin.ModelAdmin):
+    fields = [
+        "resume",
+        "company",
+        "message",
+        "status",
+        "created_at",
+        "updated_at",
+    ]
+    list_display = [
+        "id",
+        "resume",
+        "company",
+        "status",
+        "created_at",
+        "updated_at"
+    ]
+    search_fields = [
+        "resume__user__email",
+        "resume__user__first_name",
+        "resume__user__last_name",
+        "company__name"
+    ]
+    list_filter = ["status", "created_at", "company"]
+    readonly_fields = ["created_at", "updated_at"]
 
 
 @admin.register(Auction)
