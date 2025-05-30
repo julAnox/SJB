@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 from .models import (
     User,
@@ -37,6 +38,7 @@ from .serializers import (
     NotificationSerializer,
     PinnedChatSerializer,
 )
+
 
 class UserFilter(filters.FilterSet):
     class Meta:
@@ -121,11 +123,17 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
             serializer.save()
 
 
+class ResumeApplicationFilter(filters.FilterSet):
+    class Meta:
+        model = ResumeApplication
+        fields = ["resume", "company", "status"]
+
+
 class ResumeApplicationViewSet(viewsets.ModelViewSet):
     queryset = ResumeApplication.objects.all().select_related('resume__user', 'company')
     serializer_class = ResumeApplicationSerializer
     filter_backends = (filters.DjangoFilterBackend,)
-    filterset_class = ApplicationFilter
+    filterset_class = ResumeApplicationFilter
 
 
 class AuctionFilter(filters.FilterSet):
@@ -157,7 +165,7 @@ class AuctionBidViewSet(viewsets.ModelViewSet):
 class ChatFilter(filters.FilterSet):
     class Meta:
         model = Chat
-        fields = ["application", "status"]
+        fields = ["application", "resume_application", "status"]
 
 
 class ChatViewSet(viewsets.ModelViewSet):
@@ -204,40 +212,68 @@ class ChatViewSet(viewsets.ModelViewSet):
             if not user_id:
                 return Response({'error': 'User ID is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Get all chats relevant to this user
-            user_chats = []
+            # Get user
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
-            # If user is a student, get chats for their applications
-            user = get_object_or_404(User, id=user_id)
+            # Initialize chat IDs list
+            chat_ids = []
+
             if user.role == 'student':
-                applications = JobApplication.objects.filter(user=user_id)
-                user_chats = Chat.objects.filter(application__in=applications)
+                # Get job application chats where student is the applicant
+                job_applications = JobApplication.objects.filter(user=user_id)
+                job_chat_ids = Chat.objects.filter(
+                    application__in=job_applications
+                ).values_list('id', flat=True)
+                chat_ids.extend(list(job_chat_ids))
 
-            # If user is a company, get chats for jobs they posted
+                # Get resume application chats where student owns the resume
+                user_resumes = Resume.objects.filter(user=user_id)
+                resume_applications = ResumeApplication.objects.filter(resume__in=user_resumes)
+                resume_chat_ids = Chat.objects.filter(
+                    resume_application__in=resume_applications
+                ).values_list('id', flat=True)
+                chat_ids.extend(list(resume_chat_ids))
+
             elif user.role == 'company':
-                # Get company for this user
                 try:
                     company = Company.objects.get(user=user_id)
-                    # Get jobs for this company
+
+                    # Get job application chats for jobs posted by this company
                     jobs = Job.objects.filter(company=company.id)
-                    # Get applications for these jobs
-                    applications = JobApplication.objects.filter(job__in=jobs)
-                    # Get chats for these applications
-                    user_chats = Chat.objects.filter(application__in=applications)
+                    job_applications = JobApplication.objects.filter(job__in=jobs)
+                    job_chat_ids = Chat.objects.filter(
+                        application__in=job_applications
+                    ).values_list('id', flat=True)
+                    chat_ids.extend(list(job_chat_ids))
+
+                    # Get resume application chats where this company contacted students
+                    resume_applications = ResumeApplication.objects.filter(company=company.id)
+                    resume_chat_ids = Chat.objects.filter(
+                        resume_application__in=resume_applications
+                    ).values_list('id', flat=True)
+                    chat_ids.extend(list(resume_chat_ids))
+
                 except Company.DoesNotExist:
-                    # User might not have a company yet
+                    # User doesn't have a company profile yet
                     pass
 
             # Count unread messages across all relevant chats
             unread_count = Message.objects.filter(
-                chat__in=user_chats,
+                chat_id__in=chat_ids,
                 read=False
             ).exclude(sender=user_id).count()
 
             return Response({'unread_count': unread_count})
 
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # Log the actual error for debugging
+            import traceback
+            print(f"Error in unread_count: {str(e)}")
+            print(traceback.format_exc())
+            return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class MessageFilter(filters.FilterSet):
@@ -384,4 +420,3 @@ class PinnedChatViewSet(viewsets.ModelViewSet):
         pinned_chats = PinnedChat.objects.filter(user=user_id)
         serializer = self.get_serializer(pinned_chats, many=True)
         return Response(serializer.data)
-

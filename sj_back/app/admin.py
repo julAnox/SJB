@@ -206,9 +206,10 @@ class AdminAuctionBid(admin.ModelAdmin):
 class ChatAdmin(admin.ModelAdmin):
     fields = [
         "application",
+        "resume_application",
         "status",
     ]
-    list_display = ["id", "application", "status", "created_at", "message_count"]
+    list_display = ["id", "application", "resume_application", "status", "created_at", "message_count"]
     search_fields = ["application__id", "status"]
     list_filter = ["status"]
 

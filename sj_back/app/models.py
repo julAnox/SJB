@@ -185,19 +185,15 @@ class AuctionBid(models.Model):
 
 
 class Chat(models.Model):
-    application = models.ForeignKey(JobApplication, on_delete=models.CASCADE)
+    application = models.ForeignKey(JobApplication, on_delete=models.CASCADE, null=True, blank=True)
+    resume_application = models.ForeignKey(ResumeApplication, on_delete=models.CASCADE, null=True, blank=True)
     status = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return (
-                str(self.id)
-                + ". ApplicationID: "
-                + str(self.application.id)
-                + ", "
-                + self.status
-        )
+        app_id = self.application.id if self.application else self.resume_application.id if self.resume_application else "None"
+        return f"{self.id}. ApplicationID: {app_id}, {self.status}"
 
 
 class Message(models.Model):

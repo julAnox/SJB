@@ -213,11 +213,12 @@ class ChatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chat
         fields = [
-            "id",
-            "application",
-            "status",
-            "created_at",
-            "updated_at",
+            'id',
+            'application',
+            'resume_application',
+            'status',
+            'created_at',
+            'updated_at',
         ]
 
 
