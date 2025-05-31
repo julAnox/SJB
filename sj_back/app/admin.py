@@ -20,6 +20,8 @@ from .models import (
     PinnedChat,
 )
 
+admin.site.index_title = "Student's Job"
+admin.site.site_title = "Admin"
 
 @admin.register(User)
 class AdminUser(admin.ModelAdmin):
@@ -83,9 +85,11 @@ class AdminIssue(admin.ModelAdmin):
         "user",
         "issue",
         "solution",
+        "complete",
     ]
-    list_display = ["id", "user", "issue"]
-    search_fields = ["user__email", "issue", "solution"]
+    list_display = ["id", "user", "issue", "complete"]
+    list_filter = ["complete"]
+    search_fields = ["user__email", "issue", "solution","complete"]
 
 
 @admin.register(Company)

@@ -62,9 +62,15 @@ class Issue(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     issue = models.TextField(default="", max_length=100)
     solution = models.TextField(default="", max_length=100)
+    complete = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return str(self.id) + ". " + self.user.first_name + " " + self.user.last_name
+
+    def save(self, *args, **kwargs):
+        if self.solution and not self.complete:
+            self.complete = True
+        super().save(*args, **kwargs)
 
 
 class Company(models.Model):

@@ -53,10 +53,10 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 JAZZMIN_SETTINGS = {
     "show_ui_builder": True,
-    "site_brand": "Student's Job admin",
+    "site_brand": "Student's Job Admin",
     "site_icon": "img/logo.png",
     "site_logo": "img/logo.png",
-    "site_logo_classes": "img-circle",
+    "site_logo_classes": "img-rect",
     "login_logo": "img/logo.png",
     "login_logo_dark": "img/logo.png",
 }
@@ -83,7 +83,6 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": False,
     "theme": "default",
-    "dark_mode_theme": None,
     "button_classes": {
         "primary": "btn-primary",
         "secondary": "btn-secondary",
@@ -94,8 +93,6 @@ JAZZMIN_UI_TWEAKS = {
     }
 }
 
-# Remove all channel layers configuration
-# No need to keep the commented out code
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [

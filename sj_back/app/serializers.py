@@ -106,7 +106,7 @@ class CommentSerializer(serializers.ModelSerializer):
 class IssueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Issue
-        fields = ["id", "user", "issue", "solution"]
+        fields = ["id", "user", "issue", "solution", "complete"]
 
 
 class CompanySerializer(serializers.ModelSerializer):
