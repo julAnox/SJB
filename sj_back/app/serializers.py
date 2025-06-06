@@ -8,6 +8,7 @@ from .models import (
     Job,
     JobApplication,
     ResumeApplication,
+    NewsletterSubscriber,
     Auction,
     AuctionBid,
     AuctionParticipant,
@@ -306,3 +307,9 @@ class PinnedChatSerializer(serializers.ModelSerializer):
             "chat",
             "created_at",
         ]
+
+
+class NewsletterSubscriberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NewsletterSubscriber
+        fields = ['email']

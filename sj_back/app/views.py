@@ -5,6 +5,16 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.core.mail import send_mail, EmailMultiAlternatives
+from django.conf import settings
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+import json
+import base64
+from .models import NewsletterSubscriber
 
 from .models import (
     User,
@@ -41,7 +51,75 @@ from .serializers import (
     MessageSerializer,
     NotificationSerializer,
     PinnedChatSerializer,
+    NewsletterSubscriberSerializer,
 )
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def subscribe_newsletter(request):
+    try:
+        data = json.loads(request.body)
+        email = data.get('email', '').strip()
+
+        if not email:
+            return JsonResponse({
+                'success': False,
+                'message': 'Email address is required'
+            }, status=400)
+
+        # Check if email already exists
+        if NewsletterSubscriber.objects.filter(email=email).exists():
+            return JsonResponse({
+                'success': False,
+                'message': 'This email is already subscribed to our newsletter'
+            }, status=400)
+
+        subscriber = NewsletterSubscriber.objects.create(email=email)
+
+        try:
+            # Context for the email template
+            context = {
+                'email': email,
+                'company_name': "Student's Job",
+                'website_url': 'http://localhost:5173',  # Your frontend URL
+                'year': 2025,
+            }
+
+            html_content = render_to_string('emails/newsletter_welcome.html', context)
+            text_content = render_to_string('emails/newsletter_welcome.txt', context)  # Plain text version
+
+            subject = "🎉 Welcome to Student's Job Newsletter!"
+            from_email = settings.DEFAULT_FROM_EMAIL
+            to_email = [email]
+
+            msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Successfully subscribed! Check your email for confirmation.'
+            })
+
+        except Exception as email_error:
+            print(f"Email sending failed: {email_error}")
+            return JsonResponse({
+                'success': True,
+                'message': 'Successfully subscribed! (Email confirmation may be delayed)'
+            })
+
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data'
+        }, status=400)
+
+    except Exception as e:
+        print(f"Newsletter subscription error: {e}")
+        return JsonResponse({
+            'success': False,
+            'message': 'An error occurred. Please try again later.'
+        }, status=500)
 
 
 class UserFilter(filters.FilterSet):
@@ -151,93 +229,6 @@ class AuctionViewSet(viewsets.ModelViewSet):
     serializer_class = AuctionSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = AuctionFilter
-
-
-@action(detail=True, methods=['get'])
-def with_details(self, request, pk=None):
-    """Get auction with full details including student, companies, and bids"""
-    try:
-        auction = self.get_object()
-
-        # Get student details
-        student_data = None
-        if auction.student:
-            student = User.objects.get(id=auction.student.id)
-            student_data = {
-                'id': student.id,
-                'firstName': student.first_name,
-                'lastName': student.last_name,
-                'avatar': student.avatar,
-                'profession': 'Software Developer',  # Можно получить из резюме
-                'experience': '3+ years'  # Можно получить из резюме
-            }
-
-        # Get participating companies
-        participants = AuctionParticipant.objects.filter(auction=auction)
-        companies_data = []
-        for participant in participants:
-            company = participant.company
-            companies_data.append({
-                'id': company.id,
-                'name': company.name,
-                'logo': company.logo,
-                'user_id': company.user.id
-            })
-
-        # Get all bids with company details
-        bids = AuctionBid.objects.filter(auction=auction).order_by('timestamp')
-        bids_data = []
-        for bid in bids:
-            bids_data.append({
-                'id': bid.id,
-                'company': {
-                    'id': bid.company.id,
-                    'name': bid.company.name,
-                    'logo': bid.company.logo
-                },
-                'stage': bid.stage,
-                'value': bid.value,
-                'timestamp': bid.timestamp,
-                'bid_order': bid.bid_order
-            })
-
-        response_data = {
-            'id': auction.id,
-            'status': auction.status,
-            'current_stage': auction.current_stage,
-            'stage_end_time': auction.stage_end_time,
-            'student': student_data,
-            'companies': companies_data,
-            'bids': bids_data
-        }
-
-        return Response(response_data)
-
-    except Exception as e:
-        return Response({'error': str(e)}, status=500)
-
-
-@action(detail=True, methods=['post'])
-def next_stage(self, request, pk=None):
-    """Move auction to next stage"""
-    try:
-        auction = self.get_object()
-        next_stage = auction.current_stage + 1
-
-        if next_stage > 4:
-            auction.status = 'completed'
-            auction.stage_end_time = None
-        else:
-            auction.stage_end_time = timezone.now() + timezone.timedelta(minutes=1)
-
-        auction.current_stage = next_stage
-        auction.save()
-
-        serializer = self.get_serializer(auction)
-        return Response(serializer.data)
-
-    except Exception as e:
-        return Response({'error': str(e)}, status=500)
 
 
 class AuctionBidFilter(filters.FilterSet):

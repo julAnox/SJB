@@ -20,10 +20,12 @@ from .models import (
     Message,
     Notification,
     PinnedChat,
+    NewsletterSubscriber,
 )
 
 admin.site.index_title = "Student's Job"
 admin.site.site_title = "Admin"
+
 
 @admin.register(User)
 class AdminUser(admin.ModelAdmin):
@@ -89,7 +91,7 @@ class AdminIssue(admin.ModelAdmin):
     ]
     list_display = ["id", "user", "issue", "complete"]
     list_filter = ["complete"]
-    search_fields = ["user__email", "issue", "solution","complete"]
+    search_fields = ["user__email", "issue", "solution", "complete"]
 
 
 @admin.register(Company)
@@ -319,3 +321,20 @@ class PinnedChatAdmin(admin.ModelAdmin):
     list_display = ["id", "user", "chat", "created_at"]
     search_fields = ["user__email", "chat__id"]
     list_filter = ["user"]
+
+
+@admin.register(NewsletterSubscriber)
+class NewsletterSubscriberAdmin(admin.ModelAdmin):
+    fields = [
+        "email",
+        "is_active",
+    ]
+    list_display = ["id", "email", "is_active", "created_at"]
+    search_fields = ["email"]
+    list_filter = ["is_active", "created_at"]
+    readonly_fields = ["created_at"]
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:  # editing an existing object
+            return self.readonly_fields + ["email"]
+        return self.readonly_fields

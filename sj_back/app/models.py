@@ -297,3 +297,16 @@ class PinnedChat(models.Model):
 
     def __str__(self) -> str:
         return f"{self.id}. User {self.user.id} pinned Chat {self.chat.id}"
+
+
+class NewsletterSubscriber(models.Model):
+    email = models.EmailField(unique=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.email
+
+    class Meta:
+        verbose_name = "Newsletter Subscriber"
+        verbose_name_plural = "Newsletter Subscribers"

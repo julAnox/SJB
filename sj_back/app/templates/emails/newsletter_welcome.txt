@@ -1,0 +1,18 @@
+Welcome to Student's Job Newsletter!
+
+Hi there!
+
+Thank you for subscribing to Student's Job newsletter!
+
+You'll now receive updates about:
+
+We're excited to have you on board and help you find your perfect job match!
+
+Visit our website: {{ website_url }}
+
+Best regards,
+The Student's Job Team
+
+---
+© {{ year }} Student's Job. All rights reserved.
+Contact us: erm.nikita1212@gmail.com
