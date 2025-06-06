@@ -15,8 +15,6 @@ class User(models.Model):
     country = models.CharField(max_length=20, blank=True)
     region = models.CharField(max_length=20, blank=True)
     district = models.CharField(max_length=20, blank=True)
-    publish_phone = models.BooleanField(default=False)
-    publish_status = models.BooleanField(default=False)
     role = models.CharField(max_length=10, default="student")
     password = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -167,6 +165,10 @@ class Auction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
 
+    student = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    confirmation_deadline = models.DateTimeField(null=True, blank=True)
+    all_confirmed = models.BooleanField(default=False)
+
     def __str__(self) -> str:
         return (
                 str(self.id)
@@ -184,10 +186,42 @@ class AuctionBid(models.Model):
     value = models.JSONField(null=True)
     timestamp = models.CharField(max_length=255)
 
+    bid_order = models.IntegerField(default=0)
+    is_final = models.BooleanField(default=False)
+
     def __str__(self) -> str:
         return (
                 str(self.id) + ". AuctionID: " + str(self.auction.id) + ", " + self.company.name
         )
+
+
+class AuctionConfirmation(models.Model):
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='auction_confirmations')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='auction_confirmations')
+    confirmed = models.BooleanField(default=False)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'company')
+
+    def __str__(self):
+        return f"Confirmation: {self.student.first_name} - {self.company.name} ({'✓' if self.confirmed else '✗'})"
+
+
+class AuctionParticipant(models.Model):
+    auction = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name='participants')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    status = models.CharField(max_length=50, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('auction', 'company')
+
+    def __str__(self):
+        return f"Participant: {self.company.name} in Auction {self.auction.id}"
+
 
 
 class Chat(models.Model):

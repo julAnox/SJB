@@ -10,6 +10,8 @@ from .models import (
     ResumeApplication,
     Auction,
     AuctionBid,
+    AuctionParticipant,
+    AuctionConfirmation,
     Chat,
     Message,
     Notification,
@@ -31,8 +33,6 @@ class UserSerializer(serializers.ModelSerializer):
             "country",
             "region",
             "district",
-            "publish_phone",
-            "publish_status",
             "role",
             "password",
             "created_at",
@@ -185,14 +185,17 @@ class AuctionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Auction
         fields = [
-            "id",
-            "application",
-            "status",
-            "start_time",
-            "current_stage",
-            "stage_end_time",
-            "created_at",
-            "updated_at",
+            'id',
+            'application',
+            'student',
+            'status',
+            'start_time',
+            'current_stage',
+            'stage_end_time',
+            'confirmation_deadline',
+            'all_confirmed',
+            'created_at',
+            'updated_at',
         ]
 
 
@@ -200,12 +203,40 @@ class AuctionBidSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuctionBid
         fields = [
-            "id",
-            "auction",
-            "company",
-            "stage",
-            "value",
-            "timestamp",
+            'id',
+            'auction',
+            'company',
+            'stage',
+            'value',
+            'timestamp',
+            'bid_order',
+            'is_final'
+        ]
+
+
+class AuctionConfirmationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AuctionConfirmation
+        fields = [
+            'id',
+            'student',
+            'company',
+            'confirmed',
+            'confirmed_at',
+            'created_at'
+        ]
+
+
+class AuctionParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AuctionParticipant
+        fields = [
+            'id',
+            'auction',
+            'company',
+            'student',
+            'status',
+            'created_at'
         ]
 
 

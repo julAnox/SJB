@@ -14,6 +14,8 @@ from .models import (
     ResumeApplication,
     Auction,
     AuctionBid,
+    AuctionConfirmation,
+    AuctionParticipant,
     Chat,
     Message,
     Notification,
@@ -35,8 +37,6 @@ class AdminUser(admin.ModelAdmin):
         "country",
         "region",
         "district",
-        "publish_phone",
-        "publish_status",
         "role",
         "password",
         "last_signup",
@@ -182,14 +182,17 @@ class AdminResumeApplication(admin.ModelAdmin):
 class AdminAuction(admin.ModelAdmin):
     fields = [
         "application",
+        "student",
         "status",
         "start_time",
         "current_stage",
         "stage_end_time",
+        "confirmation_deadline",
+        "all_confirmed",
     ]
-    list_display = ["id", "application", "status", "current_stage"]
-    search_fields = ["application__user__email", "status"]
-    list_filter = ["status", "current_stage"]
+    list_display = ["id", "application", "student", "status", "current_stage", "all_confirmed"]
+    search_fields = ["application__user__email", "student__email", "status"]
+    list_filter = ["status", "current_stage", "all_confirmed"]
 
 
 @admin.register(AuctionBid)
@@ -200,10 +203,40 @@ class AdminAuctionBid(admin.ModelAdmin):
         "stage",
         "value",
         "timestamp",
+        "bid_order",
+        "is_final",
     ]
-    list_display = ["id", "auction", "company", "stage"]
+    list_display = ["id", "auction", "company", "stage", "bid_order", "is_final"]
     search_fields = ["company__name"]
-    list_filter = ["stage"]
+    list_filter = ["stage", "is_final"]
+
+
+@admin.register(AuctionConfirmation)
+class AdminAuctionConfirmation(admin.ModelAdmin):
+    fields = [
+        "student",
+        "company",
+        "confirmed",
+        "confirmed_at",
+    ]
+    list_display = ["id", "student", "company", "confirmed", "confirmed_at", "created_at"]
+    search_fields = ["student__email", "company__name"]
+    list_filter = ["confirmed", "created_at"]
+    readonly_fields = ["created_at"]
+
+
+@admin.register(AuctionParticipant)
+class AdminAuctionParticipant(admin.ModelAdmin):
+    fields = [
+        "auction",
+        "company",
+        "student",
+        "status",
+    ]
+    list_display = ["id", "auction", "company", "student", "status", "created_at"]
+    search_fields = ["company__name", "student__email"]
+    list_filter = ["status", "created_at"]
+    readonly_fields = ["created_at"]
 
 
 @admin.register(Chat)
