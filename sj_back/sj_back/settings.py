@@ -201,7 +201,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",
-    "https://your-frontend-domain.com",  # Add your production frontend URL
+    "https://sjf-omega.vercel.app/",  # Add your production frontend URL
 ]
 
 CORS_ORIGIN_ALLOW_ALL = DEBUG  # Only allow all origins in development
