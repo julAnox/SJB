@@ -57,3 +57,4 @@ wsproto==1.2.0
 zipp==3.21.0
 dj-database-url==2.1.0
 gunicorn==22.0.0
+django-jazzmin==2.4.1
