@@ -12,9 +12,9 @@ class User(models.Model):
     avatar = models.TextField(default="", blank=True)
     date_of_birth = models.CharField(max_length=10, blank=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
-    country = models.CharField(max_length=20, blank=True)
-    region = models.CharField(max_length=20, blank=True)
-    district = models.CharField(max_length=20, blank=True)
+    country = models.CharField(blank=True,max_length=255)
+    region = models.CharField(blank=True,max_length=255)
+    district = models.CharField(blank=True,max_length=255)
     role = models.CharField(max_length=10, default="student")
     password = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -29,10 +29,10 @@ class User(models.Model):
 
 class Resume(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    gender = models.CharField(max_length=10, choices=[('male', 'Male'), ('female', 'Female')],
-                              blank=True, null=True)
+    gender = models.CharField(choices=[('male', 'Male'), ('female', 'Female')],
+                              blank=True, null=True,max_length=255)
     profession = models.CharField(max_length=50)
-    experience = models.TextField()
+    experience = models.TextField(max_length=255)
     education = models.CharField(max_length=50)
     institutionName = models.CharField(max_length=50)
     graduationYear = models.CharField(max_length=4)
@@ -58,8 +58,8 @@ class Comment(models.Model):
 
 class Issue(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    issue = models.TextField(default="", max_length=100)
-    solution = models.TextField(default="", max_length=100)
+    issue = models.TextField(default="", max_length=300)
+    solution = models.TextField(default="", max_length=300)
     complete = models.BooleanField(default=False)
 
     def __str__(self) -> str:
@@ -73,10 +73,10 @@ class Issue(models.Model):
 
 class Company(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=40)
     logo = models.TextField(default="")
-    description = models.TextField(default="", max_length=100)
-    website = models.TextField(default="")
+    description = models.TextField(default="")
+    website = models.TextField(default="",max_length=40,blank=True)
     industry = models.CharField(max_length=50)
     size = models.CharField(max_length=20)
     founded_year = models.IntegerField()
@@ -96,7 +96,7 @@ class Job(models.Model):
     salary_min = models.FloatField()
     salary_max = models.FloatField()
     city = models.CharField(max_length=20)
-    metro = models.CharField(max_length=20)
+    metro = models.CharField(max_length=30)
     type = models.CharField(max_length=30)
     schedule = models.CharField(max_length=30)
     experiense = models.IntegerField()
@@ -114,7 +114,7 @@ class JobApplication(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     resume = models.ForeignKey(Resume, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
-    cover_letter = models.TextField(default="")
+    cover_letter = models.TextField(default="",max_length=255)
     status = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
@@ -140,7 +140,7 @@ class JobApplication(models.Model):
 class ResumeApplication(models.Model):
     resume = models.ForeignKey(Resume, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
-    message = models.TextField(default="")
+    message = models.TextField(default="",max_length=255)
     status = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

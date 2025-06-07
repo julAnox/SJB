@@ -52,8 +52,6 @@ class UserSerializer(serializers.ModelSerializer):
             "country": {"required": False, "allow_blank": True},
             "region": {"required": False, "allow_blank": True},
             "district": {"required": False, "allow_blank": True},
-            "publish_phone": {"required": False},
-            "publish_status": {"required": False},
             "password": {"required": False},
             "role": {"required": False},
             "last_login": {"read_only": True},
@@ -72,8 +70,6 @@ class UserSerializer(serializers.ModelSerializer):
         validated_data.setdefault("country", "")
         validated_data.setdefault("region", "")
         validated_data.setdefault("district", "")
-        validated_data.setdefault("publish_phone", False)
-        validated_data.setdefault("publish_status", False)
 
         return User.objects.create(**validated_data)
 
