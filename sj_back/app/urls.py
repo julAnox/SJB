@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import pinnedChatsService
 from . import views
+from .scripts.field_limits_api import get_field_limits  # Исправленный импорт
 
 from .views import (
     UserViewSet,
@@ -40,12 +41,12 @@ router.register(r"pinned-chats", PinnedChatViewSet)
 router.register(r'auction-confirmations', AuctionConfirmationViewSet)
 router.register(r'auction-participants', AuctionParticipantViewSet)
 
-
 urlpatterns = [
     path('', include(router.urls)),
     path('pinned-chats/user/<int:user_id>/', pinnedChatsService.get_pinned_chats, name='get_pinned_chats'),
     path('pinned-chats/', pinnedChatsService.create_pinned_chat, name='create_pinned_chat'),
     path('pinned-chats/user/<int:user_id>/chat/<int:chat_id>/', pinnedChatsService.delete_pinned_chat, name='delete_pinned_chat'),
     path('newsletter/subscribe/', views.subscribe_newsletter, name='newsletter_subscribe'),
-
+    path('api/field-limits/', get_field_limits, name='field_limits'),
 ]
+
