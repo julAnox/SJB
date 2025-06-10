@@ -81,7 +81,7 @@ def subscribe_newsletter(request):
             context = {
                 'email': email,
                 'company_name': "Student's Job",
-                'website_url': 'http://localhost:5173',  # Your frontend URL
+                'website_url': 'https://sjf-three.vercel.app/',  # Your frontend URL
                 'year': 2025,
             }
 
